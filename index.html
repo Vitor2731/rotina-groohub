@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Mental — Rotina do Gestor de Tráfego de Performance</title>
+<style>
+  :root {
+    --bg-page: #FAFAF7;
+    --bg-card: #FFFFFF;
+    --bg-secondary: #F1EFE8;
+    --text-primary: #2C2C2A;
+    --text-secondary: #5F5E5A;
+    --text-tertiary: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.2);
+    --info: #185FA5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-page: #1A1A18;
+      --bg-card: #25251F;
+      --bg-secondary: #2C2C2A;
+      --text-primary: #F1EFE8;
+      --text-secondary: #B4B2A9;
+      --text-tertiary: #888780;
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.25);
+      --info: #85B7EB;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+  header {
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 6px 0;
+    color: var(--text-primary);
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 20px;
+    flex-wrap: wrap;
+  }
+  .toolbar button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: filter 0.15s;
+  }
+  .toolbar button:hover { filter: brightness(0.97); }
+  @media (prefers-color-scheme: dark) {
+    .toolbar button:hover { filter: brightness(1.2); }
+  }
+  .legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .tree { font-size: 14px; line-height: 1.5; }
+  details { margin: 4px 0; }
+  details > summary {
+    cursor: pointer;
+    padding: 9px 13px;
+    border-radius: 8px;
+    list-style: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    transition: filter 0.15s;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before {
+    content: "▸";
+    display: inline-block;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 10px;
+    opacity: 0.6;
+  }
+  details[open] > summary::before { transform: rotate(90deg); }
+  details > summary:hover { filter: brightness(0.97); }
+  @media (prefers-color-scheme: dark) {
+    details > summary:hover { filter: brightness(1.15); }
+  }
+  .children {
+    margin-left: 20px;
+    padding-left: 14px;
+    border-left: 1px dashed var(--border-strong);
+    margin-top: 4px;
+  }
+  .leaf {
+    padding: 8px 13px;
+    border-radius: 8px;
+    margin: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .leaf::before {
+    content: "•";
+    flex-shrink: 0;
+    margin-top: -2px;
+    opacity: 0.6;
+  }
+
+  .problem { background: #F7C1C1; color: #501313; font-weight: 500; }
+  .hypo { background: #CECBF6; color: #26215C; }
+  .action { background: #9FE1CB; color: #04342C; }
+  .obs { background: #FAC775; color: #412402; font-size: 13px; font-style: italic; }
+  .check { background: #B5D4F4; color: #042C53; font-weight: 500; }
+
+  @media (prefers-color-scheme: dark) {
+    .problem { background: #791F1F; color: #FCEBEB; }
+    .hypo { background: #3C3489; color: #EEEDFE; }
+    .action { background: #085041; color: #E1F5EE; }
+    .obs { background: #633806; color: #FAEEDA; }
+    .check { background: #0C447C; color: #E6F1FB; }
+  }
+
+  .section-header {
+    margin: 28px 0 10px 0;
+    padding: 11px 16px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--text-primary);
+    border-left: 3px solid var(--info);
+  }
+  .section-header:first-of-type { margin-top: 0; }
+  .section-header em {
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-style: normal;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    .toolbar { display: none; }
+    details { break-inside: avoid; }
+    details > summary::before { display: none; }
+    details:not([open]) > summary + * { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Mapa mental — rotina do gestor de tráfego de performance</h1>
+  <p class="subtitle">Árvore de problemas → hipóteses → soluções. Clique nos nós para expandir.</p>
+</header>
+
+<div class="toolbar">
+  <button onclick="toggleAll(true)">Expandir tudo</button>
+  <button onclick="toggleAll(false)">Recolher tudo</button>
+  <button onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-swatch" style="background: #F7C1C1; border: 1px solid #A32D2D;"></span>Problema</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #CECBF6; border: 1px solid #534AB7;"></span>Diagnóstico / hipótese</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #9FE1CB; border: 1px solid #0F6E56;"></span>Ação / solução</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #FAC775; border: 1px solid #854F0B;"></span>Observação / regra</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #B5D4F4; border: 1px solid #0C447C;"></span>Verificação diária</span>
+</div>
+
+<div class="tree">
+
+<!-- ============ ETAPAS DE INICIALIZAÇÃO ============ -->
+<div class="section-header">☀️ Etapas de inicialização — checagens antes de diagnosticar</div>
+
+<details open>
+  <summary class="check">Saúde de conta e tracking (5 min)</summary>
+  <div class="children">
+    <div class="leaf action">Conferir reprovações de criativo (Meta) e status de anúncios (Google)</div>
+    <div class="leaf action">Verificar status da conta de anúncios: restrições, banimentos, limites de gasto</div>
+    <div class="leaf action">Pixel/CAPI ativos: eventos recebidos nas últimas 24h e qualidade do match</div>
+    <div class="leaf action">Verificar entrega de leads no CRM vs gerenciador (delta de hoje)</div>
+    <div class="leaf obs">Se algo aqui falha, o resto do diagnóstico fica enviesado. Resolver antes.</div>
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 1: META TRAFEGO ============ -->
+<div class="section-header">📉 Problema 1 — Leads de tráfego abaixo do alvo (Meta Ads)</div>
+
+<details>
+  <summary class="problem">Quantidade de leads tráfego abaixo do alvo — Meta</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">CPL tráfego DENTRO do alvo</summary>
+      <div class="children">
+        <div class="leaf action">Conferir investimento diário vs planejado</div>
+        <div class="leaf action">Conferir distribuição de verba entre campanhas/conjuntos</div>
+        <div class="leaf action">Verificar se há limite de orçamento da conta ou cartão</div>
+        <div class="leaf obs">CPL bom + volume baixo geralmente é orçamento, não criativo</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">CPL tráfego ACIMA do alvo</summary>
+      <div class="children">
+
+        <details open>
+          <summary class="hypo">Analisar métricas de criativo</summary>
+          <div class="children">
+            <div class="leaf action">Hook Rate + CPC (atenção nos 3 primeiros segundos)</div>
+            <div class="leaf action">Hold Rate + CPC (retenção até o final)</div>
+            <div class="leaf hypo">Hook, Hold e CPC ruins → criativo/público está errado</div>
+            <div class="leaf action">→ Re-testar criativos do zero. O teste atual é ruim</div>
+            <div class="leaf hypo">Hook e/ou Hold dentro do aceitável → criativo tem potencial</div>
+            <div class="leaf action">→ Solicitar variações dos criativos vencedores</div>
+          </div>
+        </details>
+
+        <details>
+          <summary class="hypo">Analisar perda no funil — Bounce de mensagem</summary>
+          <div class="children">
+            <div class="leaf obs">Muita gente clica mas o tráfego se perde entre o clique e o próximo passo</div>
+            <div class="leaf hypo">Em campanhas de mensagem: muito clique, pouca mensagem efetivada</div>
+            <div class="leaf action">Conferir perfil do WhatsApp: nome, foto, capa, descrição</div>
+            <div class="leaf action">Verificar se é WhatsApp Business oficial; histórico de banimento</div>
+            <div class="leaf action">Conferir banimento de página, Instagram ou WhatsApp</div>
+            <div class="leaf action">Revisar mensagem padrão do template (gatilhos de envio)</div>
+            <div class="leaf obs">Ex: "🟢 Online! Fale agora com um especialista" aumenta envio</div>
+          </div>
+        </details>
+
+        <details>
+          <summary class="hypo">Analisar perda no funil — Bounce de página</summary>
+          <div class="children">
+            <div class="leaf obs">Em funil de LP, dinâmico ou qualquer um com pixel em PageView</div>
+            <div class="leaf action">Analisar perda entre clique e ativação do pixel</div>
+            <div class="leaf action">Verificar tempo de carregamento (PageSpeed Insights)</div>
+            <div class="leaf action">Revisar copy da página (alinhamento com anúncio)</div>
+            <div class="leaf action">Testar página em mobile (maior parte do tráfego Meta)</div>
+          </div>
+        </details>
+
+        <details>
+          <summary class="hypo">Saturação de público / frequência alta</summary>
+          <div class="children">
+            <div class="leaf obs">Hipótese adicional: público se cansou do criativo</div>
+            <div class="leaf action">Verificar frequência (&gt;3 em audiências quentes é alerta)</div>
+            <div class="leaf action">Verificar sobreposição de leilão (auction overlap)</div>
+            <div class="leaf action">Renovar criativos ou expandir público</div>
+          </div>
+        </details>
+
+        <details>
+          <summary class="hypo">Campanha fora de aprendizado</summary>
+          <div class="children">
+            <div class="leaf obs">Hipótese adicional: campanha saiu de "Aprendendo" ou nunca saiu</div>
+            <div class="leaf action">Verificar status de aprendizado dos conjuntos</div>
+            <div class="leaf action">Evitar edições frequentes que reiniciam o aprendizado</div>
+            <div class="leaf action">Considerar consolidar conjuntos com baixo volume</div>
+          </div>
+        </details>
+
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 2: GOOGLE TRAFEGO ============ -->
+<div class="section-header">📉 Problema 2 — Leads de tráfego abaixo do alvo (Google Ads)</div>
+
+<details>
+  <summary class="problem">Quantidade de leads tráfego abaixo do alvo — Google</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">CPL tráfego DENTRO do alvo</summary>
+      <div class="children">
+        <div class="leaf action">Conferir investimento e distribuição de verba</div>
+        <div class="leaf action">Verificar limite de orçamento por campanha</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">CPL tráfego ACIMA do alvo</summary>
+      <div class="children">
+        <div class="leaf action">Analisar taxa de conversão da página</div>
+        <div class="leaf action">Analisar performance e copy da página</div>
+        <div class="leaf action">Analisar palavras-chave do anúncio e congruência com funil</div>
+        <div class="leaf action">Analisar volume de busca dos termos para a região trabalhada</div>
+        <div class="leaf action">Verificar Pontuação de Qualidade dos anúncios</div>
+        <div class="leaf action">Revisar termos de pesquisa: adicionar negativações</div>
+        <div class="leaf obs">⚠️ Volumetria: balize as conclusões pelo orçamento.</div>
+        <div class="leaf obs">Ex: R$ 30/dia, CPC R$ 2,50 → ~12 cliques/dia. Se LP converte 5%, demora 2 dias por lead. Se 3%, demora 3 dias. Sem volume, não há sinal estatístico.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Analisar parcela de impressão perdida por falta de orçamento</summary>
+      <div class="children">
+        <div class="leaf obs">Métrica disponível no Google Ads: "Parcela de impressões perdidas (orçamento)"</div>
+        <div class="leaf hypo">Se &gt; 20-30% → estratégia está sendo limitada antes mesmo de competir</div>
+        <div class="leaf obs">Às vezes a estratégia precisa de orçamento adequado para ser testada de verdade</div>
+        <div class="leaf action">Calcular orçamento mínimo viável: CPC médio × cliques necessários para 1 lead × dias de teste</div>
+        <div class="leaf action">Apresentar dado ao cliente: "com R$ X/dia, perdemos Y% dos leilões qualificados"</div>
+        <div class="leaf action">Se aumento não for possível: reduzir geografia, horários ou palavras-chave para concentrar verba</div>
+        <div class="leaf action">Comparar também "parcela perdida por classificação" (problema de qualidade, não de verba)</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 3: META LEADS REAIS ============ -->
+<div class="section-header">📊 Problema 3 — Leads reais abaixo do alvo (Meta Ads)</div>
+
+<details>
+  <summary class="problem">Leads reais abaixo do alvo — Meta</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">Analisar percentual de diferença (gerenciador vs CRM)</summary>
+      <div class="children">
+        <div class="leaf obs">Tolerância aceitável: até 20%. Ex: 100 leads no gerenciador → 80 no CRM</div>
+
+        <details>
+          <summary class="hypo">Se API NÃO oficial → planilha de tracking</summary>
+          <div class="children">
+            <div class="leaf action">Entender quantidade de leads "duplicados" / "dentro de data"</div>
+
+            <details>
+              <summary class="hypo">Sem leads na planilha</summary>
+              <div class="children">
+                <div class="leaf action">🚨 Reinstalar Evolution com urgência</div>
+              </div>
+            </details>
+
+            <details>
+              <summary class="hypo">Muitos leads dentro de data (já captados antes)</summary>
+              <div class="children">
+                <div class="leaf obs">A campanha não está trazendo gente nova</div>
+                <div class="leaf hypo">Possível causa: remarketing excessivo</div>
+                <div class="leaf hypo">Ou: marketing direto em região limitada (saturação)</div>
+                <div class="leaf action">Criar lista de leads já captados e usar como exclusão de público</div>
+                <div class="leaf action">Pensar em novas estratégias ou criativos novos</div>
+              </div>
+            </details>
+
+            <details>
+              <summary class="hypo">Poucos leads dentro de data (números reais batem)</summary>
+              <div class="children">
+                <div class="leaf obs">Possível erro de marcação do próprio Meta Ads</div>
+                <div class="leaf action">Alterar funil para evitar perdas no WhatsApp</div>
+              </div>
+            </details>
+          </div>
+        </details>
+
+        <details>
+          <summary class="hypo">Se API oficial → verificar direto no CRM</summary>
+          <div class="children">
+            <div class="leaf action">Entender mesma relação (gerenciador vs CRM) via CRM</div>
+            <div class="leaf action">Verificar integridade da integração nativa Meta ↔ CRM</div>
+          </div>
+        </details>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 4: GOOGLE LEADS REAIS ============ -->
+<div class="section-header">📊 Problema 4 — Leads reais abaixo do alvo (Google Ads)</div>
+
+<details>
+  <summary class="problem">Leads reais abaixo do alvo — Google</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">Se for landing page com formulário</summary>
+      <div class="children">
+        <div class="leaf action">Verificar integração formulário ↔ planilha</div>
+        <div class="leaf action">Verificar integração planilha ↔ CRM</div>
+        <div class="leaf action">Verificar redirect do formulário para WhatsApp (com mensagem padrão)</div>
+        <div class="leaf action">Submeter um lead teste end-to-end</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Se for landing com botão do WhatsApp</summary>
+      <div class="children">
+        <div class="leaf action">Verificar redirect do botão para WhatsApp (com mensagem padrão)</div>
+        <div class="leaf obs">A marcação dos leads é manual pela secretária</div>
+        <div class="leaf action">Confirmar com Sales Ops que estão cientes e supervisionando</div>
+        <div class="leaf action">Conferir consistência da marcação nas últimas 24-48h</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 5: QUALIDADE ============ -->
+<div class="section-header">🎯 Problema 5 — Volume bate mas qualidade do lead caiu <em>(sugestão de novo ramo)</em></div>
+
+<details>
+  <summary class="problem">Volume de leads ok, mas conversão para consulta/venda caiu</summary>
+  <div class="children">
+    <div class="leaf obs">Esse problema só aparece se houver loop de feedback do Sales Ops / clínica</div>
+
+    <details>
+      <summary class="hypo">Mudança de público / criativo amplo demais</summary>
+      <div class="children">
+        <div class="leaf action">Verificar criativos atuais: estão atraindo o ICP certo?</div>
+        <div class="leaf action">Conferir promessas implícitas no criativo (gera lead curioso vs intencionado)</div>
+        <div class="leaf action">Revisar segmentação (idade, localização, interesses)</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Mensagem padrão muito permissiva</summary>
+      <div class="children">
+        <div class="leaf action">Adicionar qualificador na mensagem inicial (preço, especialidade)</div>
+        <div class="leaf action">Considerar formulário de pré-qualificação na LP</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Sazonalidade / calendário</summary>
+      <div class="children">
+        <div class="leaf obs">Feriados, datas comemorativas, eventos locais afetam intenção</div>
+        <div class="leaf action">Mapear feriados/eventos próximos (ex: clínica médica perto de feriado)</div>
+        <div class="leaf action">Ajustar expectativa com cliente quando aplicável</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ ETAPAS DE FINALIZAÇÃO ============ -->
+<div class="section-header">🌙 Etapas de finalização — registro e ajustes</div>
+
+<details>
+  <summary class="check">Registrar diagnóstico e ação tomada (10 min)</summary>
+  <div class="children">
+    <div class="leaf action">Anotar no log do cliente: problema → hipótese testada → ação</div>
+    <div class="leaf action">Marcar ações que precisam de validação no D+1, D+3 e D+7</div>
+    <div class="leaf action">Sinalizar Sales Ops se houver mudança que afete recepção do lead</div>
+    <div class="leaf obs">Manter histórico previne repetir testes ruins e acelera decisão futura</div>
+  </div>
+</details>
+
+</div>
+
+</div>
+
+<script>
+  function toggleAll(open) {
+    document.querySelectorAll('details').forEach(d => d.open = open);
+  }
+</script>
+
+</body>
+</html>
