@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Mental — Rotina do Sales Ops</title>
+<style>
+  :root {
+    --bg-page: #FAFAF7;
+    --bg-card: #FFFFFF;
+    --bg-secondary: #F1EFE8;
+    --text-primary: #2C2C2A;
+    --text-secondary: #5F5E5A;
+    --text-tertiary: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.2);
+    --info: #185FA5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-page: #1A1A18;
+      --bg-card: #25251F;
+      --bg-secondary: #2C2C2A;
+      --text-primary: #F1EFE8;
+      --text-secondary: #B4B2A9;
+      --text-tertiary: #888780;
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.25);
+      --info: #85B7EB;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+  header {
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 6px 0;
+    color: var(--text-primary);
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 20px;
+    flex-wrap: wrap;
+  }
+  .toolbar button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: filter 0.15s;
+  }
+  .toolbar button:hover { filter: brightness(0.97); }
+  @media (prefers-color-scheme: dark) {
+    .toolbar button:hover { filter: brightness(1.2); }
+  }
+  .legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .tree { font-size: 14px; line-height: 1.5; }
+  details { margin: 4px 0; }
+  details > summary {
+    cursor: pointer;
+    padding: 9px 13px;
+    border-radius: 8px;
+    list-style: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    transition: filter 0.15s;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before {
+    content: "▸";
+    display: inline-block;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 10px;
+    opacity: 0.6;
+  }
+  details[open] > summary::before { transform: rotate(90deg); }
+  details > summary:hover { filter: brightness(0.97); }
+  @media (prefers-color-scheme: dark) {
+    details > summary:hover { filter: brightness(1.15); }
+  }
+  .children {
+    margin-left: 20px;
+    padding-left: 14px;
+    border-left: 1px dashed var(--border-strong);
+    margin-top: 4px;
+  }
+  .leaf {
+    padding: 8px 13px;
+    border-radius: 8px;
+    margin: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .leaf::before {
+    content: "•";
+    flex-shrink: 0;
+    margin-top: -2px;
+    opacity: 0.6;
+  }
+
+  .problem { background: #F7C1C1; color: #501313; font-weight: 500; }
+  .hypo { background: #CECBF6; color: #26215C; }
+  .action { background: #9FE1CB; color: #04342C; }
+  .obs { background: #FAC775; color: #412402; font-size: 13px; font-style: italic; }
+  .check { background: #B5D4F4; color: #042C53; font-weight: 500; }
+
+  @media (prefers-color-scheme: dark) {
+    .problem { background: #791F1F; color: #FCEBEB; }
+    .hypo { background: #3C3489; color: #EEEDFE; }
+    .action { background: #085041; color: #E1F5EE; }
+    .obs { background: #633806; color: #FAEEDA; }
+    .check { background: #0C447C; color: #E6F1FB; }
+  }
+
+  .section-header {
+    margin: 28px 0 10px 0;
+    padding: 11px 16px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--text-primary);
+    border-left: 3px solid var(--info);
+  }
+  .section-header:first-of-type { margin-top: 0; }
+  .section-header em {
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-style: normal;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    .toolbar { display: none; }
+    details { break-inside: avoid; }
+    details > summary::before { display: none; }
+    details:not([open]) > summary + * { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Mapa mental — rotina do Sales Ops</h1>
+  <p class="subtitle">Árvore de problemas → hipóteses → soluções da rotina de Sales Ops. Clique nos nós para expandir.</p>
+</header>
+
+<div class="toolbar">
+  <button onclick="toggleAll(true)">Expandir tudo</button>
+  <button onclick="toggleAll(false)">Recolher tudo</button>
+  <button onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-swatch" style="background: #F7C1C1; border: 1px solid #A32D2D;"></span>Problema</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #CECBF6; border: 1px solid #534AB7;"></span>Diagnóstico / hipótese</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #9FE1CB; border: 1px solid #0F6E56;"></span>Ação / solução</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #FAC775; border: 1px solid #854F0B;"></span>Observação / regra</span>
+  <span class="legend-item"><span class="legend-swatch" style="background: #B5D4F4; border: 1px solid #0C447C;"></span>Verificação diária</span>
+</div>
+
+<div class="tree">
+
+<!-- ============ ETAPAS DE INICIALIZAÇÃO ============ -->
+<div class="section-header">☀️ Etapas de inicialização — conciliação antes de diagnosticar</div>
+
+<details open>
+  <summary class="check">Conciliação numérica (10 min)</summary>
+  <div class="children">
+    <div class="leaf action">Comparar: leads no gerenciador (Meta/Google) vs planilha de tracking vs CRM</div>
+    <div class="leaf action">Calcular delta percentual de cada perna (origem → planilha → CRM)</div>
+    <div class="leaf obs">Tolerância aceitável: até 20% de perda entre origem e CRM</div>
+    <div class="leaf action">Se delta acima do aceitável, abrir investigação no ramo correspondente abaixo</div>
+    <div class="leaf action">Registrar números atuais em task de acompanhamento por cliente</div>
+  </div>
+</details>
+
+<details>
+  <summary class="check">Saúde de integrações (5 min)</summary>
+  <div class="children">
+    <div class="leaf action">Evolution API: status de conexão de todos os clientes ativos</div>
+    <div class="leaf action">Make/n8n: cenários rodando sem erro nas últimas 24h</div>
+    <div class="leaf action">Webhooks do CRM: verificar logs de falha</div>
+    <div class="leaf action">WhatsApp Business: sem banimento ou aviso de uso</div>
+    <div class="leaf obs">Se algo está quebrado aqui, o diagnóstico abaixo fica enviesado. Resolver antes.</div>
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 1: LEAD NÃO ENTROU NO CRM ============ -->
+<div class="section-header">🚫 Problema 1 — Lead chegou na origem mas NÃO entrou no CRM</div>
+
+<details>
+  <summary class="problem">Falha na origem ou inexistência de leads no CRM</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">Funil de WhatsApp direto — Se Meta Ads (API não oficial)</summary>
+      <div class="children">
+        <div class="leaf hypo">Hipótese principal: Planilha de tracking do WhatsApp desconectada</div>
+        <div class="leaf action">🔧 Correção: verificar mensagem padrão do anúncio e taguear leads manualmente</div>
+        <div class="leaf action">🛡️ Prevenção: reconectar Evolution API imediatamente e avisar o cliente</div>
+        <div class="leaf action">Conferir histórico de desconexões recentes (problema recorrente?)</div>
+        <div class="leaf obs">Evolution desconectada é a causa nº 1 de "lead some" em Meta direto</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Funil de WhatsApp direto — Se Google Ads</summary>
+      <div class="children">
+        <div class="leaf obs">Em Google, tagueamento via WhatsApp direto nunca é automático</div>
+        <div class="leaf hypo">Hipótese: falha no redirect da LP ou falta de mensagem padrão</div>
+        <div class="leaf action">🔧 Correção: taguear leads manualmente no CRM</div>
+        <div class="leaf action">🛡️ Prevenção: verificar e corrigir link de redirect após clique no botão do WhatsApp</div>
+        <div class="leaf action">🛡️ Prevenção: verificar e corrigir mensagem padrão no redirect do WhatsApp</div>
+        <div class="leaf action">Confirmar com secretária que ela está marcando origem manualmente</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Funil de WhatsApp direto — Ambos (Meta e Google)</summary>
+      <div class="children">
+        <div class="leaf hypo">Além dos pontos anteriores, provavelmente há falha na integração WhatsApp ↔ CRM</div>
+        <div class="leaf action">🔧 Correção = Prevenção: solicitar ao cliente reconectar WhatsApp no CRM urgentemente</div>
+        <div class="leaf action">Validar com lead-teste após reconexão</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Funil de formulário (independente de Meta ou Google)</summary>
+      <div class="children">
+        <div class="leaf hypo">Hipótese: falha na integração via Make: Formulário ↔ Planilha ↔ CRM</div>
+        <div class="leaf action">🔧 Correção: taguear leads manualmente no CRM</div>
+        <div class="leaf action">🛡️ Prevenção: verificar e corrigir integração via Make (cenário com erro)</div>
+        <div class="leaf action">Verificar limite de operações do Make no mês (pode estourar plano)</div>
+        <div class="leaf action">Submeter lead-teste end-to-end após correção</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 2: INFORMAÇÕES INCONSISTENTES ============ -->
+<div class="section-header">📋 Problema 2 — Lead entrou no CRM mas com informação errada ou ausente</div>
+
+<details>
+  <summary class="problem">Informações inconsistentes no CRM / Planilha</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">Preenchimento ERRADO de campos (datas, valores, etc)</summary>
+      <div class="children">
+        <div class="leaf obs">Inclui falhas na execução do processo: follow-ups, atendimento, movimentação de etapas</div>
+        <div class="leaf action">🔧 Correção: corrigir informações manualmente nos registros afetados</div>
+        <div class="leaf action">🛡️ Prevenção: identificar o gargalo (pessoa, etapa, momento do dia)</div>
+        <div class="leaf action">🛡️ Prevenção: re-treinar a secretária / time de atendimento</div>
+        <div class="leaf action">🛡️ Prevenção: intensificar relacionamento e supervisão na semana</div>
+        <div class="leaf action">🛡️ Prevenção: pensar em automações de processo (campos obrigatórios, validações)</div>
+        <div class="leaf obs">Erro recorrente da mesma pessoa = problema de treinamento. Erro espalhado = problema de processo.</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">SEM preenchimento de campos (datas, valores, etapas)</summary>
+      <div class="children">
+        <div class="leaf obs">Inclui follow-ups não registrados, atendimentos não marcados, etapas não movimentadas</div>
+        <div class="leaf action">🔧 Correção: preencher informações manualmente</div>
+        <div class="leaf action">🛡️ Prevenção: intervir e corrigir gargalo (re-treinar, intensificar relacionamento)</div>
+        <div class="leaf action">🛡️ Prevenção: pensar em automações de processo</div>
+        <div class="leaf action">Criar relatório semanal de campos vazios por responsável</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">UTMs / origem / campanha vazia ou errada</summary>
+      <div class="children">
+        <div class="leaf obs">Sem essa info, gestor de tráfego não consegue analisar performance</div>
+        <div class="leaf action">Verificar se mensagem padrão dos anúncios carrega identificador da campanha</div>
+        <div class="leaf action">Verificar parâmetros UTM nas URLs de LP</div>
+        <div class="leaf action">Treinar secretária para marcar origem nos casos de tagueamento manual</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 3: PROCESSO NÃO RODOU ============ -->
+<div class="section-header">⏱️ Problema 3 — Lead no CRM, mas processo de atendimento não rodou</div>
+
+<details>
+  <summary class="problem">Leads parados / SLA de atendimento estourado</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">Lead novo sem primeiro contato dentro do SLA</summary>
+      <div class="children">
+        <div class="leaf obs">Definir SLA por cliente. Padrão sugerido: primeiro contato em até 5 min em horário comercial</div>
+        <div class="leaf action">Listar leads do dia com tempo de primeira resposta acima do SLA</div>
+        <div class="leaf hypo">Causa possível: secretária sobrecarregada (volume acima da capacidade)</div>
+        <div class="leaf hypo">Causa possível: lead chegou fora do horário e não há automação de resposta</div>
+        <div class="leaf hypo">Causa possível: notificação do CRM não está chegando</div>
+        <div class="leaf action">🛡️ Prevenção: configurar mensagem de primeiro contato automática</div>
+        <div class="leaf action">🛡️ Prevenção: revisar dimensionamento do time de atendimento</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Lead parado em etapa há mais de X dias</summary>
+      <div class="children">
+        <div class="leaf obs">Definir X por etapa do funil (ex: "Em contato" > 3 dias = alerta)</div>
+        <div class="leaf action">Gerar lista de leads encalhados por etapa e por responsável</div>
+        <div class="leaf action">🔧 Correção: cobrar movimentação ou descarte do lead</div>
+        <div class="leaf action">🛡️ Prevenção: criar automação que avisa quando lead passa do tempo limite</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Follow-ups previstos não realizados</summary>
+      <div class="children">
+        <div class="leaf action">Verificar tarefas vencidas no CRM por responsável</div>
+        <div class="leaf action">🔧 Correção: cobrar execução do follow-up pendente</div>
+        <div class="leaf hypo">Se recorrente com a mesma pessoa: problema de disciplina ou capacidade</div>
+        <div class="leaf hypo">Se recorrente no time todo: problema de processo ou ferramenta</div>
+        <div class="leaf action">🛡️ Prevenção: criar cadência automática para follow-ups críticos</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ PROBLEMA 4: QUALIDADE DA BASE (NOVO) ============ -->
+<div class="section-header">🧹 Problema 4 — Higiene da base de leads</div>
+
+<details>
+  <summary class="problem">Base do CRM acumulando ruído</summary>
+  <div class="children">
+
+    <details>
+      <summary class="hypo">Leads duplicados</summary>
+      <div class="children">
+        <div class="leaf action">Rodar busca por telefone/email duplicado</div>
+        <div class="leaf action">🔧 Correção: mesclar registros mantendo histórico mais completo</div>
+        <div class="leaf action">🛡️ Prevenção: validação anti-duplicidade na entrada (regra do CRM)</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Leads frios sem descarte</summary>
+      <div class="children">
+        <div class="leaf obs">Lead sem interação há 30+ dias geralmente é perdido, mas continua poluindo dashboards</div>
+        <div class="leaf action">Gerar relatório de leads inativos por período</div>
+        <div class="leaf action">🔧 Correção: descartar ou mover para etapa "perdido" com motivo</div>
+        <div class="leaf action">🛡️ Prevenção: automação de descarte após X dias sem interação</div>
+      </div>
+    </details>
+
+    <details>
+      <summary class="hypo">Etapas / motivos de perda mal configurados</summary>
+      <div class="children">
+        <div class="leaf action">Auditar etapas do funil: estão sendo usadas conforme combinado?</div>
+        <div class="leaf action">Auditar motivos de perda: percentual alto em "outros" indica falta de opção adequada</div>
+        <div class="leaf action">🛡️ Prevenção: revisar com cliente trimestralmente</div>
+      </div>
+    </details>
+
+  </div>
+</details>
+
+<!-- ============ ETAPAS DE FINALIZAÇÃO ============ -->
+<div class="section-header">🌙 Etapas de finalização — registro e handoff</div>
+
+<details>
+  <summary class="check">Registrar achados e ações (10 min)</summary>
+  <div class="children">
+    <div class="leaf action">Registrar na task do cliente: problema identificado → hipótese → correção → prevenção sugerida</div>
+    <div class="leaf action">Sinalizar gestor de tráfego se houver mudança que afete análise de leads</div>
+    <div class="leaf action">Sinalizar cliente se houver ação que dependa dele (reconectar WhatsApp, treinar time)</div>
+    <div class="leaf action">Marcar verificações de D+1, D+3 e D+7 para validar correções aplicadas</div>
+    <div class="leaf obs">Padrões recorrentes viram pauta de reunião com cliente — não correção pontual</div>
+  </div>
+</details>
+
+<details>
+  <summary class="check">Escalonamento com o cliente — quando levar pra reunião</summary>
+  <div class="children">
+    <div class="leaf action">Reincidências (mesmo problema 3+ vezes em curto período)</div>
+    <div class="leaf action">Problemas que dependem de ação do cliente (treinamento de equipe, troca de ferramenta)</div>
+    <div class="leaf action">Sugestões de automação que reduzem tempo de Sales Ops</div>
+    <div class="leaf action">Métricas de saúde do funil consolidadas</div>
+  </div>
+</details>
+
+</div>
+
+</div>
+
+<script>
+  function toggleAll(open) {
+    document.querySelectorAll('details').forEach(d => d.open = open);
+  }
+</script>
+
+</body>
+</html>
